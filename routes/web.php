@@ -9,7 +9,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\LaporanController;
 
 // ==========================
-// 🔐 LOGIN / LOGOUT
+//  LOGIN / LOGOUT
 // ==========================
 
 // Redirect root ke login
@@ -27,7 +27,7 @@ Route::post('/kasir/login', [AuthKasirController::class, 'login'])->name('kasir.
 Route::post('/kasir/logout', [AuthKasirController::class, 'logout'])->name('kasir.logout');
 
 // ==========================
-// 🧭 Protected routes (auth:kasir)
+//  Protected routes (auth:kasir)
 // ==========================
 Route::middleware('auth:kasir')->group(function () {
 
