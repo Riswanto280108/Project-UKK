@@ -65,6 +65,7 @@ class TransaksiController extends Controller
                 DetailTransaksi::create([
                     'id_transaksi' => $transaksi->id_transaksi,
                     'id_barang' => $barang->id_barang,
+                    'nama_barang' => $barang->nama_barang,
                     'jumlah_barang' => $item['jumlah'],
                     'subtotal' => $item['subtotal'],
                 ]);
@@ -74,11 +75,14 @@ class TransaksiController extends Controller
             }
 
             // Update laporan
-            $periode = Carbon::now()->toDateString();
-            $laporan = Laporan::firstOrNew(['periode' => $periode]);
-            $laporan->total_pendapatan = ($laporan->total_pendapatan ?? 0) + $total_harga;
-            $laporan->jumlah_transaksi = ($laporan->jumlah_transaksi ?? 0) + 1;
-            $laporan->save();
+           // Simpan laporan satu per satu
+Laporan::create([
+    'periode' => Carbon::now()->toDateString(),
+    'jumlah_transaksi' => 1,
+    'total_pendapatan' => $total_harga,
+    'id_transaksi' => $transaksi->id_transaksi, // jika kolomnya ada
+]);
+
 
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Transaksi berhasil disimpan']);

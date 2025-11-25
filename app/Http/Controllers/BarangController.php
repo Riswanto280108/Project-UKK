@@ -10,8 +10,8 @@ class BarangController extends Controller
 {
     public function index()
     {
-        $barang = Barang::with('kategori')->get(); // ✅ ambil barang beserta kategori
-        $kategori = Kategori::all(); // untuk dropdown di modal tambah/edit
+        $barang = Barang::with('kategori')->get();
+        $kategori = Kategori::all();
         return view('barang.index', compact('barang', 'kategori'));
     }
 
@@ -24,6 +24,11 @@ class BarangController extends Controller
             'id_kategori' => 'required|exists:kategoris,id_kategori',
         ]);
 
+        // Cek duplikat nama barang
+        if (Barang::where('nama_barang', $request->nama_barang)->exists()) {
+            return redirect()->back()->with('error', 'Barang tersebut sudah ada!');
+        }
+
         Barang::create($request->all());
         return redirect()->back()->with('success', 'Barang berhasil ditambahkan!');
     }
@@ -31,6 +36,15 @@ class BarangController extends Controller
     public function update(Request $request, $id)
     {
         $barang = Barang::findOrFail($id);
+
+        // Cek duplikat ketika update
+        if (Barang::where('nama_barang', $request->nama_barang)
+            ->where('id_barang', '!=', $id)
+            ->exists()
+        ) {
+            return redirect()->back()->with('error', 'Nama barang sudah digunakan!');
+        }
+
         $barang->update($request->all());
         return redirect()->back()->with('success', 'Barang berhasil diperbarui!');
     }

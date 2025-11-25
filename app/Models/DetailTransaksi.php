@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class DetailTransaksi extends Model
 {
-    use HasFactory;
+     use HasFactory;
 
     protected $primaryKey = 'id_detail_transaksi';
-    protected $fillable = ['id_transaksi', 'id_barang', 'jumlah_barang', 'subtotal'];
+    protected $fillable = ['id_transaksi', 'id_barang','nama_barang', 'jumlah_barang', 'subtotal'];
 
     public function transaksi()
     {

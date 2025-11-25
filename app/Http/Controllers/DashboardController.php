@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\Kategori;
+use Carbon\Carbon;
+use App\Models\Transaksi;
 use App\Models\Kasir;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
@@ -18,7 +20,10 @@ class DashboardController extends Controller
 
         // Ambil total pendapatan dari laporan terbaru
         $laporanTerbaru = Laporan::orderBy('periode', 'desc')->first();
-        $totalPendapatan = $laporanTerbaru->total_pendapatan ?? 0;
+        
+        $today = Carbon::today();
+        $totalPendapatan = Transaksi::whereDate('tanggal_transaksi', $today)
+    ->sum('total_harga');
 
         // Ambil data laporan terakhir 5 hari (untuk riwayat transaksi)
         $riwayatLaporan = Laporan::orderBy('periode', 'desc')->take(5)->get();

@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->decimal('total_pendapatan', 15, 2)->default(0);
             $table->integer('jumlah_transaksi')->default(0);
             $table->timestamps();
+            $table->unsignedBigInteger('id_transaksi')->nullable();
         });
     }
 

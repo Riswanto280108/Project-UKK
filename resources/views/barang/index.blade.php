@@ -1,8 +1,17 @@
 @extends('layouts.app')
-
+@section('title', 'Barang')
 @section('content')
 <div class="container mt-4">
     <h2>Data Barang</h2>
+
+    {{-- Notifikasi --}}
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     {{-- Tombol Tambah --}}
     <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#tambahBarangModal">
@@ -53,7 +62,7 @@
                             @csrf
                             @method('PUT')
                             <div class="modal-header">
-                                <h5 class="modal-title" id="editBarangLabel{{ $b->id_barang }}">Edit Barang</h5>
+                                <h5 class="modal-title">Edit Barang</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
@@ -62,6 +71,7 @@
                                     <input type="text" name="nama_barang" class="form-control"
                                         value="{{ $b->nama_barang }}" required>
                                 </div>
+
                                 <div class="mb-3">
                                     <label>Kategori</label>
                                     <select name="id_kategori" class="form-select" required>
@@ -73,15 +83,18 @@
                                         @endforeach
                                     </select>
                                 </div>
+
                                 <div class="mb-3">
                                     <label>Stok</label>
                                     <input type="number" name="stok" class="form-control" value="{{ $b->stok }}" required>
                                 </div>
+
                                 <div class="mb-3">
                                     <label>Harga</label>
                                     <input type="number" name="harga" class="form-control" value="{{ $b->harga }}" required>
                                 </div>
                             </div>
+
                             <div class="modal-footer">
                                 <button type="submit" class="btn btn-success">Simpan</button>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -90,6 +103,7 @@
                     </div>
                 </div>
             </div>
+
             @empty
             <tr>
                 <td colspan="6" class="text-center">Belum ada data barang.</td>
@@ -100,13 +114,13 @@
 </div>
 
 {{-- Modal Tambah Barang --}}
-<div class="modal fade" id="tambahBarangModal" tabindex="-1" aria-labelledby="tambahBarangLabel" aria-hidden="true">
+<div class="modal fade" id="tambahBarangModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form action="{{ route('barang.store') }}" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="tambahBarangLabel">Tambah Barang</h5>
+                    <h5 class="modal-title">Tambah Barang</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -114,24 +128,28 @@
                         <label>Nama Barang</label>
                         <input type="text" name="nama_barang" class="form-control" required>
                     </div>
+
                     <div class="mb-3">
                         <label>Kategori</label>
                         <select name="id_kategori" class="form-select" required>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach ($kategori as $k)
-                            <option value="{{ $k->id_kategori }}">{{ $k->nama_kategori }}</option>
+                                <option value="{{ $k->id_kategori }}">{{ $k->nama_kategori }}</option>
                             @endforeach
                         </select>
                     </div>
+
                     <div class="mb-3">
                         <label>Stok</label>
                         <input type="number" name="stok" class="form-control" required>
                     </div>
+
                     <div class="mb-3">
                         <label>Harga</label>
                         <input type="number" name="harga" class="form-control" required>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Simpan</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>

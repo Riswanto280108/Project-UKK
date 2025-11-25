@@ -43,4 +43,6 @@ Route::middleware('auth:kasir')->group(function () {
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
     Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/{periode}/detail', [LaporanController::class, 'detail'])->name('laporan.detail');
+
 });

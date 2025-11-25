@@ -1,8 +1,11 @@
 @extends('layouts.app')
-
+@section('title', 'Transaksi')
 @section('content')
 <div class="container mt-4">
-    <h2>Transaksi Penjualan</h2>
+    <h2>Transaksi</h2>
+
+    <!-- Notifikasi -->
+    <div id="notifikasi" class="alert d-none position-fixed top-0 end-0 m-3 shadow" style="z-index: 9999;"></div>
 
     <div class="row mt-3">
         <div class="col-md-4">
@@ -62,6 +65,20 @@
 </div>
 
 <script>
+// 🔔 FUNGSI NOTIFIKASI
+function showNotif(pesan, tipe = 'success') {
+    const notif = document.getElementById('notifikasi');
+    notif.className = `alert alert-${tipe} show position-fixed top-0 end-0 m-3`;
+    notif.textContent = pesan;
+    notif.classList.remove('d-none');
+
+    setTimeout(() => {
+        notif.classList.add('d-none');
+    }, 2500);
+}
+
+// ==================== SCRIPT TRANSAKSI ====================
+
 let items = [];
 
 document.getElementById('barang').addEventListener('change', e => {
@@ -73,20 +90,22 @@ document.getElementById('tambah').addEventListener('click', () => {
     const select = document.getElementById('barang');
     const id_barang = select.value;
     const option = select.selectedOptions[0];
-    if (!option) return alert('Pilih barang terlebih dahulu!');
+    if (!option) return showNotif('Pilih barang terlebih dahulu!', 'danger');
+
     const nama = option.text.split('(')[0].trim();
     const harga = parseFloat(option.dataset.harga || 0);
     const stok = parseInt(option.dataset.stok || 0);
     const jumlah = parseInt(document.getElementById('jumlah').value || 0);
 
-    if (!id_barang || jumlah <= 0) return alert('Isi barang dan jumlah dengan benar!');
-    if (jumlah > stok) return alert('Jumlah melebihi stok!');
+    if (!id_barang || jumlah <= 0) return showNotif('Isi barang dan jumlah dengan benar!', 'danger');
+    if (jumlah > stok) return showNotif('Jumlah melebihi stok yang tersedia!', 'danger');
 
     const subtotal = harga * jumlah;
     items.push({ id_barang, nama, harga, jumlah, subtotal });
+
+    showNotif('Barang berhasil ditambahkan!', 'success');
     renderTable();
 
-    // reset form input barang
     select.value = '';
     document.getElementById('jumlah').value = '';
     document.getElementById('harga').value = '';
@@ -96,6 +115,7 @@ function renderTable() {
     const tbody = document.querySelector('#tabelTransaksi tbody');
     tbody.innerHTML = '';
     let total = 0;
+
     items.forEach((item, index) => {
         total += item.subtotal;
         tbody.innerHTML += `
@@ -107,26 +127,29 @@ function renderTable() {
                 <td><button class="btn btn-danger btn-sm" onclick="hapusItem(${index})">X</button></td>
             </tr>`;
     });
+
     document.getElementById('totalHarga').innerText = 'Rp ' + total.toLocaleString('id-ID');
+
     document.getElementById('pembayaran').oninput = function() {
         const bayar = parseFloat(this.value || 0);
         const kembali = bayar - total;
-        document.getElementById('kembalian').value = kembali >= 0 ? 'Rp ' + kembali.toLocaleString('id-ID') : '-';
+        document.getElementById('kembalian').value = kembali >= 0 ?
+            'Rp ' + kembali.toLocaleString('id-ID') : '-';
     };
 }
 
 function hapusItem(i) {
     items.splice(i, 1);
     renderTable();
+    showNotif('Barang telah dihapus!', 'warning');
 }
 
 document.getElementById('simpanTransaksi').addEventListener('click', async () => {
     const total = items.reduce((a,b)=>a+b.subtotal,0);
     const pembayaran = parseFloat(document.getElementById('pembayaran').value || 0);
-    const kembalian = pembayaran - total;
 
-    if (items.length === 0) return alert('Belum ada barang!');
-    if (pembayaran < total) return alert('Pembayaran kurang!');
+    if (items.length === 0) return showNotif('Belum ada barang!', 'danger');
+    if (pembayaran < total) return showNotif('Pembayaran kurang!', 'danger');
 
     try {
         const res = await fetch('{{ route("transaksi.store") }}', {
@@ -135,15 +158,23 @@ document.getElementById('simpanTransaksi').addEventListener('click', async () =>
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({ items, total_harga: total, pembayaran, kembalian })
+            body: JSON.stringify({
+                items,
+                total_harga: total,
+                pembayaran,
+                kembalian: pembayaran - total
+            })
         });
+
         const data = await res.json();
-        alert(data.message);
-        if (data.success) location.reload();
+        showNotif(data.message, data.success ? 'success' : 'danger');
+
+        if (data.success) setTimeout(() => location.reload(), 1500);
     } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan transaksi!');
+        showNotif('Terjadi kesalahan saat menyimpan transaksi!', 'danger');
         console.error(err);
     }
 });
 </script>
 @endsection
+
